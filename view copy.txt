@@ -1,0 +1,51 @@
+-- 1. Create Dept table with primary key constraint
+CREATE TABLE Dept (
+    DeptId INT PRIMARY KEY,
+    DeptName VARCHAR(50) NOT NULL
+);
+
+-- 1. Create Emp table with primary key and foreign key constraints
+CREATE TABLE Emp (
+    EmpId INT PRIMARY KEY,
+    EmpName VARCHAR(50) NOT NULL,
+    DeptId INT,
+    Salary DECIMAL(10, 2),
+    CONSTRAINT fk_DeptId FOREIGN KEY (DeptId) REFERENCES Dept(DeptId)
+);
+
+-- 2a. Create Simple View: Employees with a Salary Greater Than 50,000
+CREATE VIEW HighSalaryEmp AS
+SELECT EmpId, EmpName, DeptId, Salary
+FROM Emp
+WHERE Salary > 50000;
+
+-- 2b. Create Complex View: Employee Details with Department Name (Joining Tables)
+CREATE VIEW EmpDeptInfo AS
+SELECT e.EmpId, e.EmpName, d.DeptName, e.Salary
+FROM Emp e
+JOIN Dept d ON e.DeptId = d.DeptId;
+
+-- 3a. Insert Data Using View (If the view is updatable, will reflect in Emp table)
+INSERT INTO EmpDeptInfo (EmpId, EmpName, DeptName, Salary)
+VALUES (101, 'John Doe', 'Sales', 55000);
+
+-- 3b. Update Data Using View HighSalaryEmp
+UPDATE HighSalaryEmp
+SET Salary = 60000
+WHERE EmpId = 101;
+
+-- 3c. Delete Data Using View HighSalaryEmp
+DELETE FROM HighSalaryEmp
+WHERE EmpId = 101;
+
+-- 4. Create an Index Called EmployeeId for the Dept Table
+CREATE INDEX EmployeeId
+ON Dept (DeptId ASC);
+
+-- 5. Create a Sequence for Employee IDs
+CREATE SEQUENCE EmpId_Seq
+START WITH 1
+INCREMENT BY 1;
+
+-- 6. Delete Index
+DROP INDEX EmployeeId;

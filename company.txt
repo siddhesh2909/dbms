@@ -1,0 +1,66 @@
+-- Create the company database
+CREATE DATABASE company;
+
+-- Switch to the company database
+USE company;
+
+-- Create the dept table
+CREATE TABLE dept (
+    deptno INT PRIMARY KEY,
+    deptname VARCHAR(100),
+    location VARCHAR(100)
+);
+
+-- Create the emp table
+CREATE TABLE emp (
+    eno INT PRIMARY KEY,
+    ename VARCHAR(100),
+    job VARCHAR(100),
+    hiredate DATE,
+    salary DECIMAL(10, 2),
+    commission DECIMAL(10, 2),
+    deptno INT,
+    FOREIGN KEY (deptno) REFERENCES dept(deptno)
+);
+SELECT MAX(salary) AS max_salary
+FROM emp
+WHERE job = 'salesman';
+
+SELECT ename
+FROM emp
+WHERE ename LIKE 'I%';
+
+SELECT *
+FROM emp
+WHERE hiredate < '1981-09-30';
+
+SELECT *
+FROM emp
+ORDER BY salary DESC;
+
+SELECT COUNT(*) AS num_of_employees, AVG(salary) AS avg_salary
+FROM emp
+WHERE deptno = 20;
+
+SELECT hiredate, AVG(salary) AS avg_salary, MIN(salary) AS min_salary
+FROM emp
+WHERE deptno = 10
+GROUP BY hiredate;
+
+SELECT e.ename, d.deptname
+FROM emp e
+JOIN dept d ON e.deptno = d.deptno;
+
+SELECT d.deptname, SUM(e.salary) AS total_salary
+FROM emp e
+JOIN dept d ON e.deptno = d.deptno
+GROUP BY d.deptname;
+
+SELECT e.*
+FROM emp e
+JOIN dept d ON e.deptno = d.deptno
+WHERE d.deptname = 'Dev';
+
+UPDATE emp
+SET salary = salary + (salary * 0.05)
+WHERE deptno = 10;
