@@ -1,0 +1,57 @@
+create database emp;
+use emp;
+
+CREATE TABLE Emp (
+    e_no INT PRIMARY KEY,
+    e_name VARCHAR(100),
+    salary DECIMAL(10, 2)
+);
+
+CREATE TABLE Tracking (
+    e_no INT,
+    salary DECIMAL(10, 2),
+    PRIMARY KEY (e_no, salary),
+    FOREIGN KEY (e_no) REFERENCES Emp(e_no)
+);
+
+DELIMITER //
+
+CREATE TRIGGER before_insert_emp
+BEFORE INSERT ON Emp
+FOR EACH ROW
+BEGIN
+    IF NEW.salary < 50000 THEN
+        
+        INSERT INTO Tracking (e_no, salary) VALUES (NEW.e_no, NEW.salary);
+        
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: Salary must be at least Rs. 50,000 for new employees.';
+    END IF;
+END; //
+
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER before_update_emp
+BEFORE UPDATE ON Emp
+FOR EACH ROW
+BEGIN
+    IF NEW.salary < 50000 THEN
+    
+        INSERT INTO Tracking (e_no, salary) VALUES (NEW.e_no, NEW.salary);
+        
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: Salary must be at least Rs. 50,000 for updated employees.';
+    END IF;
+END; //
+
+DELIMITER ;
+
+INSERT INTO Emp (e_no, e_name, salary) 
+VALUES 
+(1, 'jj', 60000),
+(2, 'pratik', 55000);
+
+UPDATE Emp SET salary = 2000 WHERE e_no = 2; 
+
+SELECT * FROM Tracking;

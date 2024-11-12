@@ -1,0 +1,57 @@
+create database lib;
+use lib;
+
+CREATE TABLE Library (
+    BookID INT PRIMARY KEY,
+    Title VARCHAR(100),
+    Author VARCHAR(100),
+    PublishedYear INT
+);
+
+CREATE TABLE Library_Audit (
+    AuditID INT AUTO_INCREMENT PRIMARY KEY,
+    BookID INT,
+    Title VARCHAR(100),
+    Author VARCHAR(100),
+    PublishedYear INT,
+    OperationType VARCHAR(10),
+    OperationTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO Library (BookID, Title, Author, PublishedYear)
+VALUES 
+(1, 'CNS', 'abc', 1949),
+(2, 'DBMS', 'xyz', 1960),
+(3, 'TOC', 'lmn', 1925);
+
+DELIMITER //
+CREATE TRIGGER Before_Library_Delete
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (BookID, Title, Author, PublishedYear, OperationType)
+    VALUES (OLD.BookID, OLD.Title, OLD.Author, OLD.PublishedYear, 'DELETE');
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER After_Library_Update
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (BookID, Title, Author, PublishedYear, OperationType)
+    VALUES (OLD.BookID, OLD.Title, OLD.Author, OLD.PublishedYear, 'UPDATE');
+END //
+DELIMITER ;
+
+
+select * from library;
+
+UPDATE Library
+SET title = 'Computer Networks and Security'
+WHERE BookID = 1;
+
+DELETE FROM Library
+WHERE BookID = 3;
+
+Select * from Library_audit;
