@@ -1,0 +1,60 @@
+create database cur;
+use cur;
+
+CREATE TABLE N_RollCall (
+    student_id int PRIMARY KEY,
+    student_name VARCHAR(100),
+    class VARCHAR(10)
+);
+
+CREATE TABLE O_RollCall (
+    student_id int PRIMARY KEY,
+    student_name VARCHAR(100),
+    class VARCHAR(10)
+);
+
+INSERT INTO N_RollCall (student_id, student_name, class) 
+VALUES 
+(1, 'Aarav', '10A'),
+(2, 'Vivaan', '10A'),
+(3, 'Aditya', '10B'),
+(4, 'Vihaan', '10C'),
+(5, 'Reyansh', '10A');
+
+INSERT INTO O_RollCall (student_id, student_name, class)
+VALUES 
+(3, 'Aditya', '10B'),
+(4, 'Vihaan', '10C');
+
+DELIMITER //
+CREATE PROCEDURE MergeRollCalls()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_student_id INT;
+    DECLARE v_student_name VARCHAR(100);
+    DECLARE v_class VARCHAR(10);
+
+    DECLARE cur_n_rollcall CURSOR FOR
+        SELECT student_id, student_name, class FROM N_RollCall;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur_n_rollcall;
+    read_loop: LOOP
+        FETCH cur_n_rollcall INTO v_student_id, v_student_name, v_class;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM O_RollCall WHERE student_id = v_student_id) THEN
+            INSERT INTO O_RollCall (student_id, student_name, class)
+            VALUES (v_student_id, v_student_name, v_class);
+        END IF;
+    END LOOP;
+    CLOSE cur_n_rollcall;
+    COMMIT; 
+END //
+DELIMITER ;
+
+Call MergeRollCalls();
+select * from O_RollCall;
+
