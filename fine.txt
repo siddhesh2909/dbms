@@ -1,0 +1,82 @@
+-- Create Borrower table
+CREATE TABLE Borrower (
+    Roll_no INT,
+    NameofBook VARCHAR(255),
+    DateofIssue DATE,
+    Status CHAR(1)
+);
+
+-- Create Fine table
+CREATE TABLE Fine (
+    Roll_no INT,
+    Date DATE,
+    Amt DECIMAL(10, 2)
+);
+
+-- Insert sample data into Borrower table
+INSERT INTO Borrower (Roll_no, NameofBook, DateofIssue, Status) VALUES
+(101, 'Database Management Systems', '2024-09-01', 'I'),
+(102, 'Data Structures', '2024-09-15', 'I'),
+(103, 'Operating Systems', '2024-10-01', 'I'),
+(104, 'Computer Networks', '2024-10-10', 'R'), -- Already returned book
+(105, 'Algorithms', '2024-09-20', 'I');
+
+-- Create procedure to process book returns and calculate fines
+DELIMITER //
+
+CREATE PROCEDURE process_return (
+    IN p_roll_no INT,
+    IN p_name_of_book VARCHAR(255)
+)
+BEGIN
+    DECLARE v_date_of_issue DATE;
+    DECLARE v_current_date DATE DEFAULT CURDATE();
+    DECLARE v_days_overdue INT;
+    DECLARE v_fine_amount DECIMAL(10, 2) DEFAULT 0;
+    DECLARE v_status CHAR(1);
+
+    -- Exception handling for missing records
+    DECLARE EXIT HANDLER FOR NOT FOUND
+        SELECT 'Invalid Roll Number or Book Name.' AS error_message;
+
+    -- Fetch issue date and status of the book
+    SELECT DateofIssue, Status INTO v_date_of_issue, v_status
+    FROM Borrower
+    WHERE Roll_no = p_roll_no AND NameofBook = p_name_of_book;
+
+    -- If the book is still issued, calculate fine
+    IF v_status = 'I' THEN
+        SET v_days_overdue = DATEDIFF(v_current_date, v_date_of_issue);
+
+        -- Fine calculation based on overdue days
+        IF v_days_overdue BETWEEN 15 AND 30 THEN
+            SET v_fine_amount = v_days_overdue * 5;
+        ELSEIF v_days_overdue > 30 THEN
+            SET v_fine_amount = (30 * 5) + ((v_days_overdue - 30) * 50);
+        END IF;
+
+        -- Update book status to 'R' (returned)
+        UPDATE Borrower
+        SET Status = 'R'
+        WHERE Roll_no = p_roll_no AND NameofBook = p_name_of_book;
+
+        -- Insert a fine record if applicable
+        IF v_fine_amount > 0 THEN
+            INSERT INTO Fine (Roll_no, Date, Amt)
+            VALUES (p_roll_no, v_current_date, v_fine_amount);
+            SELECT CONCAT('Fine recorded: Rs ', v_fine_amount) AS message;
+        ELSE
+            SELECT 'No fine applicable. Book returned on time.' AS message;
+        END IF;
+    ELSE
+        -- Raise error if the book is not currently issued
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No record found for the given Roll Number and Book Name.';
+    END IF;
+
+END //
+
+DELIMITER ;
+
+CALL process_return(101, 'Database Management Systems');
+
+SELECT * FROM Fine;
