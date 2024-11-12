@@ -1,0 +1,63 @@
+Create database grade;
+use grade;
+
+CREATE TABLE Stud_Marks (
+    Roll INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Total_Marks INT
+);
+
+CREATE TABLE Result (
+    Roll INT,
+    Name VARCHAR(100),
+    Class VARCHAR(50),
+    FOREIGN KEY (Roll) REFERENCES Stud_Marks(Roll)
+);
+
+INSERT INTO Stud_Marks (Roll, Name, Total_Marks) VALUES
+(1, 'Jj', 1200),
+(2, 'abc', 850),
+(3, 'xyz', 950),
+(4, 'Pratik', 700),
+(5, 'lmn', 890);
+
+
+DELIMITER //
+
+CREATE PROCEDURE proc_Grade (IN p_roll INT)
+BEGIN
+    DECLARE v_class VARCHAR(50);
+    DECLARE v_total_marks INT;
+    DECLARE v_name VARCHAR(100);
+
+    -- Retrieve the student's name and total marks using the provided roll number
+    SELECT Name, Total_Marks INTO v_name, v_total_marks 
+    FROM Stud_Marks
+    WHERE Roll = p_roll;
+
+    -- Categorize the total marks into grades
+    IF v_total_marks >= 990 AND v_total_marks <= 1500 THEN
+        SET v_class = 'Distinction';
+    ELSEIF v_total_marks >= 900 AND v_total_marks <= 989 THEN
+        SET v_class = 'First Class';
+    ELSEIF v_total_marks >= 825 AND v_total_marks <= 899 THEN
+        SET v_class = 'Higher Second Class';
+    ELSE
+        SET v_class = 'No Category';
+    END IF;
+
+    -- Insert the categorized result into the StudentGrades table
+    INSERT INTO Result (Roll, Name, Class)
+    VALUES (p_roll, v_name, v_class);
+END //
+
+DELIMITER ;
+
+
+CALL proc_Grade(1); 
+CALL proc_Grade(2); 
+CALL proc_Grade(3); 
+CALL proc_Grade(4); 
+CALL proc_Grade(5);
+
+Select * from result;
