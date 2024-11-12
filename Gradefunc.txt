@@ -1,0 +1,47 @@
+create database grade;
+use grade;
+
+Create Table studMarks(
+	roll int primary key,
+    name varchar(50),
+    marks int
+);
+Create table result(
+	roll int,
+    name varchar(50),
+    class varchar(50),
+    Foreign key(roll) references studMarks(roll)
+);
+
+INSERT INTO Stud_Marks (roll,name, marks) 
+VALUES
+(1,'John Doe', 1200),
+(2,'Jane Smith', 950),
+(3,'Bob Johnson', 880),
+(4,'Alice Brown', 800);
+
+DELIMITER //
+Create Function calc(marks int)
+RETURNS varchar(50)
+DETERMINISTIC
+BEGIN
+    DECLARE class varchar(50);
+    IF marks <= 1500 AND marks >= 900 THEN
+        SET class = 'DISTINCTION';
+    ELSEIF marks <= 989 AND marks >= 900 THEN
+        SET class = 'First Class';
+    ELSEIF marks <= 899 AND marks >= 825 THEN
+        SET class = 'Higher Second Class';
+    ELSE
+        SET class = 'Not Specified';
+	END IF;
+    
+	RETURN class;
+END //
+DELIMITER ;
+    
+insert into result(roll,name,class)
+select roll,name,calc(makrs) 
+from studMarks;
+
+SELECT * FROM Result;
