@@ -1,0 +1,116 @@
+-- Create tables
+CREATE TABLE Department (
+    DeptID INT PRIMARY KEY,
+    Dname VARCHAR(50),
+    Location VARCHAR(50)
+);
+
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    Ename VARCHAR(50),
+    Salary DECIMAL(10,2),
+    Contactno VARCHAR(15),
+    City VARCHAR(50),
+    DeptID INT,
+    FOREIGN KEY (DeptID) REFERENCES Department(DeptID)
+);
+
+-- Insert sample data
+INSERT INTO Department VALUES
+(1, 'IT', 'New York'),
+(2, 'HR', 'Chicago'),
+(3, 'Finance', 'Boston'),
+(4, 'Marketing', 'Seattle');
+
+INSERT INTO Employee VALUES
+(101, 'John Doe', 75000, '1234567890', 'New York', 1),
+(102, 'Jane Smith', 65000, '2345678901', 'Chicago', 2),
+(103, 'Bob Wilson', 85000, '3456789012', 'Boston', 3),
+(104, 'Alice Brown', 70000, '4567890123', 'Seattle', 1),
+(105, 'Charlie Davis', 90000, '5678901234', 'Chicago', NULL),
+(106, 'Eve Johnson', 60000, '6789012345', 'Boston', 2);
+
+-- 1. Display Employee Name and Department name
+SELECT e.Ename, d.Dname
+FROM Employee e
+JOIN Department d ON e.DeptID = d.DeptID;
+
+-- 2. Inner Join: Employees with their department names and locations
+SELECT e.Ename, d.Dname, d.Location
+FROM Employee e
+INNER JOIN Department d ON e.DeptID = d.DeptID;
+
+-- 3. Left Join: All employees with department details (if available)
+SELECT e.Ename, d.Location, d.Dname
+FROM Employee e
+LEFT JOIN Department d ON e.DeptID = d.DeptID;
+
+-- 4. Right Join: All departments with employee details (if available)
+SELECT e.Ename, e.Salary, d.Dname, d.Location
+FROM Employee e
+RIGHT JOIN Department d ON e.DeptID = d.DeptID;
+
+-- 5. Full Join (Using UNION in MySQL as it doesn't support FULL JOIN directly)
+SELECT e.Ename, d.Dname
+FROM Employee e
+LEFT JOIN Department d ON e.DeptID = d.DeptID
+UNION
+SELECT e.Ename, d.Dname
+FROM Employee e
+RIGHT JOIN Department d ON e.DeptID = d.DeptID;
+
+-- 6. Cross Join: All possible combinations
+SELECT e.Ename, d.Dname
+FROM Employee e
+CROSS JOIN Department d;
+
+-- 7. Self Join: Employees in same department
+SELECT e1.Ename as Employee1, e2.Ename as Employee2, d.Dname
+FROM Employee e1
+JOIN Employee e2 ON e1.DeptID = e2.DeptID AND e1.EmpID < e2.EmpID
+JOIN Department d ON e1.DeptID = d.DeptID;
+
+-- 8. Create Simple View
+CREATE VIEW EmployeeBasicInfo AS
+SELECT e.EmpID, e.Ename, d.Dname
+FROM Employee e
+LEFT JOIN Department d ON e.DeptID = d.DeptID;
+
+-- Create Complex View
+CREATE VIEW EmployeeDepartmentStats AS
+SELECT 
+    d.Dname,
+    COUNT(e.EmpID) as EmployeeCount,
+    AVG(e.Salary) as AvgSalary,
+    MAX(e.Salary) as MaxSalary,
+    MIN(e.Salary) as MinSalary
+FROM Department d
+LEFT JOIN Employee e ON d.DeptID = e.DeptID
+GROUP BY d.Dname;
+
+-- 9. Update Simple View
+UPDATE EmployeeBasicInfo
+SET Ename = 'John Smith'
+WHERE EmpID = 101;
+
+-- Delete Views
+DROP VIEW IF EXISTS EmployeeBasicInfo;
+DROP VIEW IF EXISTS EmployeeDepartmentStats;
+
+-- Additional Useful Queries:
+
+-- Subquery Example 1: Employees with salary higher than average
+SELECT Ename, Salary
+FROM Employee
+WHERE Salary > (SELECT AVG(Salary) FROM Employee);
+
+-- Subquery Example 2: Departments with more than 2 employees
+SELECT d.Dname, 
+    (SELECT COUNT(*) FROM Employee e WHERE e.DeptID = d.DeptID) as EmpCount
+FROM Department d
+HAVING EmpCount > 2;
+
+-- Subquery Example 3: Employees in departments located in New York
+SELECT Ename
+FROM Employee
+WHERE DeptID IN (SELECT DeptID FROM Department WHERE Location = 'New York');
