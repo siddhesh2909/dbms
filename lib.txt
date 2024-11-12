@@ -1,0 +1,127 @@
+Create DataBase Library;
+Use Library;
+CREATE TABLE PUBLISHER (
+    PID INT PRIMARY KEY,
+    PNAME VARCHAR(100),
+    ADDRESS VARCHAR(200),
+    STATE VARCHAR(50),
+    PHONE VARCHAR(15),
+    EMAILID VARCHAR(100)
+);
+CREATE TABLE BOOK (
+    ISBN VARCHAR(20) PRIMARY KEY,
+    BOOK_TITLE VARCHAR(200),
+    CATEGORY VARCHAR(50),
+    PRICE DECIMAL(10, 2),
+    COPYRIGHT_DATE DATE,
+    YEAR INT,
+    PAGE_COUNT INT,
+    PID INT,
+    FOREIGN KEY (PID) REFERENCES PUBLISHER(PID)
+);
+CREATE TABLE AUTHOR (
+    AID INT PRIMARY KEY,
+    ANAME VARCHAR(100),
+    STATE VARCHAR(50),
+    CITY VARCHAR(50),
+    ZIP VARCHAR(10),
+    PHONE VARCHAR(15),
+    URL VARCHAR(100)
+);
+CREATE TABLE AUTHOR_BOOK (
+    AID INT,
+    ISBN VARCHAR(13),
+    PRIMARY KEY (AID, ISBN),
+    FOREIGN KEY (AID) REFERENCES AUTHOR(AID),
+    FOREIGN KEY (ISBN) REFERENCES BOOK(ISBN)
+);
+CREATE TABLE REVIEW (
+    RID INT PRIMARY KEY,
+    ISBN VARCHAR(13),
+    RATING DECIMAL(2, 1),
+    FOREIGN KEY (ISBN) REFERENCES BOOK(ISBN)
+);
+INSERT INTO PUBLISHER (PID, PNAME, ADDRESS, STATE, PHONE, EMAILID)
+VALUES
+(1, 'Penguin India', '123, MG Road, Mumbai', 'Maharashtra', '9876543210', 'contact@penguinindia.com'),
+(2, 'Rupa Publications', '456, Park Street, Kolkata', 'West Bengal', '9876543211', 'info@rupa.co.in'),
+(3, 'HarperCollins India', '789, Connaught Place, Delhi', 'Delhi', '9876543212', 'support@harpercollins.in'),
+(4, 'Mehta Publishing', '101, FC Road, Pune', 'Maharashtra', '9876543213', 'sales@mehtapublishers.com');
+
+
+INSERT INTO BOOK (ISBN, BOOK_TITLE, CATEGORY, PRICE, COPYRIGHT_DATE, YEAR, PAGE_COUNT, PID)
+VALUES
+('9780143418766', 'The', 'Fiction', 299.99, '2008-01-01', 2008, 257, 1),
+('9788129135520', 'Half', 'Romance', 250.00, '2014-05-01', 2014, 260, 2),
+('9789353022394', 'Alchemist', 'Philosophy', 399.00, '2006-09-01', 2006, 192, 3),
+('9788177662991', 'Shala', 'Fiction', 180.00, '2003-07-15', 2003, 144, 4);
+
+INSERT INTO AUTHOR (AID, ANAME, STATE, CITY, ZIP, PHONE, URL)
+VALUES
+(1, 'Chetan Bhagat', 'Delhi', 'New Delhi', '110001', '9998887776', 'https://chetanbhagat.com'),
+(2, 'Amish Tripathi', 'Maharashtra', 'Mumbai', '400001', '9998887777', 'https://amisht.tripathi.in'),
+(3, 'Paulo Coelho', 'Goa', 'Panaji', '403001', '9998887778', 'https://paulocoelho.com'),
+(4, 'Shivaji Sawant', 'Maharashtra', 'Pune', '411004', '9998887779', 'https://shivajisawant.com');
+
+INSERT INTO AUTHOR_BOOK (AID, ISBN)
+VALUES
+(1, '9780143418766'),  
+(1, '9788129135520'),  
+(3, '9789353022394'),  
+(4, '9788177662991');  
+
+INSERT INTO REVIEW (RID, ISBN, RATING)
+VALUES
+(1, '9780143418766', 4.5),
+(2, '9788129135520', 4.0),
+(3, '9789353022394', 4.8),
+(4, '9788177662991', 4.2);
+
+-- Retrieve city, phone, and URL of the author whose name is 'CHETAN BHAGAT'.
+SELECT CITY, PHONE, URL
+FROM AUTHOR
+WHERE ANAME = 'CHETAN BHAGAT';
+
+-- Retrieve book title, reviewable id (RID), and rating of all books. 
+SELECT B.BOOK_TITLE, R.RID, R.RATING
+FROM BOOK B
+JOIN REVIEW R ON B.ISBN = R.ISBN;
+
+-- Retrieve book title, price, author name, and URL for books published by ‘MEHTA’. 
+SELECT B.BOOK_TITLE, B.PRICE, A.ANAME, A.URL
+FROM BOOK B
+JOIN PUBLISHER P ON B.PID = P.PID
+JOIN AUTHOR_BOOK AB ON B.ISBN = AB.ISBN
+JOIN AUTHOR A ON AB.AID = A.AID
+WHERE P.PNAME = 'Mehta Publishing';
+
+SET SQL_SAFE_UPDATES = 0;
+
+-- Update the phone number of ‘MEHTA’ to 123456.
+UPDATE PUBLISHER
+SET PHONE = '123456'
+WHERE PNAME = 'MEHTA';
+
+-- Calculate and display the average, maximum, and minimum price of books by each publisher.
+SELECT P.PNAME, AVG(B.PRICE) AS AVG_PRICE, MAX(B.PRICE) AS MAX_PRICE, MIN(B.PRICE) AS MIN_PRICE
+FROM BOOK B
+JOIN PUBLISHER P ON B.PID = P.PID
+GROUP BY P.PNAME;
+
+-- Delete details of all books having a page count less than 100.
+DELETE FROM BOOK
+WHERE PAGE_COUNT < 100;
+
+-- Retrieve details of all authors residing in Pune whose name begins with the character ‘C’. 
+SELECT *
+FROM AUTHOR
+WHERE CITY = 'Pune' AND ANAME LIKE 'C%';
+
+-- Retrieve details of authors residing in the same city as the author named 'Korth'.
+SELECT *
+FROM AUTHOR
+WHERE CITY = (SELECT CITY FROM AUTHOR WHERE ANAME = 'Korth');
+
+
+
+
