@@ -1,0 +1,129 @@
+CREATE DATABASE propertydealers;
+USE propertydealers;
+
+-- Creating Branch Table
+CREATE TABLE Branch (
+    branchno INT PRIMARY KEY,
+    street VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    postcode VARCHAR(10) NOT NULL
+);
+
+-- Creating Staff Table
+CREATE TABLE Staff (
+    Staffno INT PRIMARY KEY,
+    fname VARCHAR(100) NOT NULL,
+    lname VARCHAR(100) NOT NULL,
+    position VARCHAR(50) NOT NULL,
+    Sex CHAR(1),
+    DOB DATE NOT NULL,
+    salary int,
+    branchno INT,
+    FOREIGN KEY (branchno) REFERENCES Branch(branchno)
+);
+
+-- Creating PrivateOwner Table
+CREATE TABLE PrivateOwner (
+    OUID INT PRIMARY KEY,
+    fName VARCHAR(100) NOT NULL,
+    lName VARCHAR(100) NOT NULL,
+    address VARCHAR(255) NOT NULL
+);
+
+-- Creating PropertyforRent Table
+CREATE TABLE PropertyforRent (
+    propertyNo INT PRIMARY KEY,
+    street VARCHAR(100) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    postcode VARCHAR(10) NOT NULL,
+    Type VARCHAR(50) NOT NULL,
+    rooms INT CHECK (rooms > 0),
+    rent DECIMAL(10, 2) CHECK (rent >= 0),
+    ownerno INT,
+    staffno INT,
+    branchno INT,
+    FOREIGN KEY (ownerno) REFERENCES PrivateOwner(OUID),
+    FOREIGN KEY (staffno) REFERENCES Staff(Staffno),
+    FOREIGN KEY (branchno) REFERENCES Branch(branchno)
+);
+
+-- Creating Client Table
+CREATE TABLE Client (
+    CUID INT PRIMARY KEY,
+    fName VARCHAR(100) NOT NULL,
+    lName VARCHAR(100) NOT NULL,
+    Rent DECIMAL(10, 2) CHECK (Rent >= 0)
+);
+
+-- Insert data into Branch table
+INSERT INTO Branch (branchno, street, city, postcode) VALUES
+    (1, 'Main St', 'Pune', '411041'),
+    (2, 'Elm St', 'Pune', '411042'),
+    (3, 'Oak St', 'Mumbai', '400001');
+
+-- Insert data into Staff table
+INSERT INTO Staff (Staffno, fname, lname, position, Sex, DOB, salary, branchno) VALUES
+    (101, 'Amit', 'Patel', 'Manager', 'M', '1985-06-15', 50000, 1),
+    (102, 'Sita', 'Sharma', 'Sales', 'F', '1990-02-20', 40000, 1),
+    (103, 'Rahul', 'Kumar', 'Sales', 'M', '1988-03-30', 45000, 2),
+    (104, 'Neha', 'Singh', 'Executive', 'F', '1992-11-05', 30000, 3),
+    (105, 'Vijay', 'Joshi', 'Executive', 'M', '1989-07-25', 32000, 2),
+    (106, 'Rani', 'Deshmukh', 'Executive', 'F', '1993-04-12', 28000, 1);
+
+-- Insert data into PrivateOwner table
+INSERT INTO PrivateOwner (OUID, fName, lName, address) VALUES
+    (201, 'Ajay', 'Verma', '1234 Elm St, Pune'),
+    (202, 'Riya', 'Ghosh', '5678 Oak St, Mumbai'),
+    (203, 'Deepak', 'Sharma', '7890 Pine St, Pune');
+
+-- Insert data into PropertyforRent table
+INSERT INTO PropertyforRent (propertyNo, street, city, postcode, Type, rooms, rent, ownerno, staffno, branchno) VALUES
+    (301, '1st Ave', 'Pune', '411041', 'Apartment', 2, 15000, 201, 101, 1),
+    (302, '2nd Ave', 'Pune', '411041', 'House', 3, 25000, 202, 102, 1),
+    (303, '3rd Ave', 'Mumbai', '400001', 'Apartment', 1, 12000, 203, 103, 3);
+
+-- Insert data into Client table
+INSERT INTO Client (CUID, fName, lName, Rent) VALUES
+    (401, 'Aditi', 'Kumar', 15000),
+    (402, 'Raj', 'Patel', 25000),
+    (403, 'Sneha', 'Ghosh', 12000);
+
+UPDATE Staff SET lname = 'Shinde' WHERE Staffno = 106;
+
+DELETE FROM Branch WHERE postcode = '411041';
+
+SELECT * FROM Staff
+WHERE (fname LIKE '%A%A%') OR (lname LIKE '%A%A%') 
+
+SELECT branchno, MAX(salary) AS MaxSalary
+FROM Staff
+GROUP BY branchno
+ORDER BY MaxSalary DESC;
+
+SELECT DISTINCT c.*
+FROM Client c
+JOIN PrivateOwner p ON c.fName = p.fName AND c.lName = p.lName;
+
+SELECT p.*
+FROM PrivateOwner p
+LEFT JOIN Client c ON p.fName = c.fName AND p.lName = c.lName
+WHERE c.CUID IS NULL;
+
+SELECT * FROM PrivateOwner
+WHERE fName LIKE '__c%';
+
+UPDATE Branch SET street = 'MG' WHERE branchno = 1001;
+
+DELETE FROM PrivateOwner WHERE fName = 'Amit';
+
+SELECT * FROM Client WHERE Rent > 10000;
+
+SELECT fname, lname FROM Staff
+WHERE salary > (SELECT AVG(salary) FROM Staff);
+
+SELECT Type, rooms FROM PropertyforRent WHERE city = 'Pune';
+
+SELECT fname,lname from Staff where position = ('saleswomen' OR 'salesman')
+
+SELECT COUNT(*) AS NumberOfFlats FROM PropertyforRent WHERE Type = 'Flat';
+
