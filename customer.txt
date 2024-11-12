@@ -1,0 +1,157 @@
+CREATE TABLE Sales_Representative (
+    Rep_no INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Re_office VARCHAR(100),
+    Quota DECIMAL(10, 2),
+    sales DECIMAL(10, 2)
+);
+
+CREATE TABLE Customers (
+    Cust_No INT PRIMARY KEY,
+    Company VARCHAR(100),
+    Cust_Rep INT,
+    Credit_Limit DECIMAL(10, 2),
+    FOREIGN KEY (Cust_Rep) REFERENCES Sales_Representative(Rep_no)
+);
+
+CREATE TABLE Orders (
+    Order_no INT PRIMARY KEY,
+    cust INT,
+    product VARCHAR(100),
+    Quantity INT,
+    amount DECIMAL(10, 2),
+    Disc DECIMAL(10, 2),
+    FOREIGN KEY (cust) REFERENCES Customers(Cust_No)
+);
+
+INSERT INTO Sales_Representative (Rep_no, Name, Re_office, Quota, sales) VALUES 
+(1, 'John Doe', 'Office1', 50000.00, 30000.00),
+(2, 'Jane Smith', 'Office1', 60000.00, 35000.00),
+(3, 'Michael Johnson', 'Office2', 45000.00, 20000.00);
+
+INSERT INTO Customers (Cust_No, Company, Cust_Rep, Credit_Limit) VALUES 
+(101, 'TCS', 1, 100000.00),
+(102, 'Infosys', 2, 80000.00),
+(103, 'Wipro', 3, 50000.00);
+
+INSERT INTO Orders (Order_no, cust, product, Quantity, amount, Disc) VALUES 
+(1001, 101, 'Product A', 10, 30000.00, 500.00),
+(1002, 102, 'Product B', 5, 25000.00, 200.00),
+(1003, 103, 'Product C', 20, 40000.00, 1000.00),
+(1004, 101, 'Product D', 15, 35000.00, 750.00);
+
+SELECT 
+    c.Company AS CustomerName,  
+    sr.Name AS RepName,  
+    sr.Re_office AS OfficeNumber 
+FROM 
+    Customers c 
+JOIN 
+    Sales_Representative sr ON c.Cust_Rep = sr.Rep_no;
+
+SELECT 
+    o.Order_no,  
+    o.amount,  
+    c.Company AS CustomerName,  
+    sr.Name AS RepName 
+FROM 
+    Orders o 
+JOIN 
+    Customers c ON o.cust = c.Cust_No 
+JOIN 
+    Sales_Representative sr ON c.Cust_Rep = sr.Rep_no 
+WHERE 
+    o.amount > 25000;
+
+
+SELECT 
+    o.product  
+FROM 
+    Orders o 
+JOIN 
+    Customers c ON o.cust = c.Cust_No 
+WHERE 
+    c.Company = 'TCS';
+
+
+SELECT 
+    c.Company  
+FROM 
+    Customers c 
+JOIN 
+    Orders o ON c.Cust_No = o.cust 
+ORDER BY 
+    o.Disc DESC 
+LIMIT 1;
+
+
+SELECT 
+    sr1.Name AS Rep1,  
+    sr2.Name AS Rep2,  
+    sr1.Re_office 
+FROM 
+    Sales_Representative sr1 
+JOIN 
+    Sales_Representative sr2 ON sr1.Re_office = sr2.Re_office 
+WHERE 
+    sr1.Rep_no != sr2.Rep_no;
+
+
+SELECT 
+    c.Company,  
+    c.Credit_Limit,  
+    SUM(o.Disc) AS TotalDiscount 
+FROM 
+    Customers c 
+JOIN 
+    Orders o ON c.Cust_No = o.cust 
+GROUP BY 
+    c.Company, c.Credit_Limit;
+
+
+SELECT 
+    c.Company AS CustomerName, 
+    c.Credit_Limit, 
+    sr.Name AS RepName, 
+    sr.sales AS RepSales 
+FROM 
+    Customers c 
+JOIN 
+    Sales_Representative sr ON c.Cust_Rep = sr.Rep_no;
+
+
+SELECT 
+    o.Order_no,  
+    o.amount,  
+    c.Company AS CustomerName, 
+    c.Credit_Limit 
+FROM 
+    Orders o 
+JOIN 
+    Customers c ON o.cust = c.Cust_No;
+
+
+SELECT 
+    o.product,  
+    SUM(o.amount) AS TotalSales 
+FROM 
+    Orders o 
+GROUP BY 
+    o.product 
+HAVING 
+    SUM(o.amount) > 12000;
+
+
+SELECT 
+    o.amount,  
+    c.Company AS CustomerName,  
+    sr.Name AS RepName 
+FROM 
+    Orders o 
+JOIN 
+    Customers c ON o.cust = c.Cust_No 
+JOIN 
+    Sales_Representative sr ON c.Cust_Rep = sr.Rep_no 
+WHERE 
+    o.product LIKE '%Software%';
+
