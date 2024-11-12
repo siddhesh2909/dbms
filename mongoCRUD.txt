@@ -1,0 +1,114 @@
+db.student.insertMany([
+    { fname: "Bhakti", lname: "Jadhav", age: 19, gender: "female", city: "Pune", state: "MH", class: "TE B", grd_point: 35, course: "BSc" },
+    { fname: "Raj", lname: "Sharma", age: 20, gender: "male", city: "Bangalore", state: "KA", class: "TE A", grd_point: 32, course: "BE" },
+    { fname: "Amit", lname: "Patil", age: 21, gender: "male", city: "Mumbai", state: "MH", class: "TE A", grd_point: 30, course: "BTech" },
+    { fname: "Riyansh", lname: "Desai", age: 19, gender: "male", city: "Bangalore", state: "KA", class: "TE C", grd_point: 28, course: "BCom" },
+    { fname: "Ravi", lname: "Jadhav", age: 18, gender: "male", city: "Pune", state: "MH", class: "TE B", grd_point: 29, course: "BSc" },
+    { fname: "Sonia", lname: "Soniminde", age: 22, gender: "female", city: "Mumbai", state: "MH", class: "TE D", grd_point: 34, course: "BA" },
+    { fname: "Manish", lname: "Singh", age: 23, gender: "male", city: "Nagpur", state: "MH", class: "BE A", grd_point: 33, course: "BE" },
+    { fname: "Naina", lname: "Joshi", age: 20, gender: "female", city: "Pune", state: "MH", class: "TE B", grd_point: 36, course: "BBA" },
+    { fname: "Akash", lname: "Mehta", age: 21, gender: "male", city: "Mumbai", state: "MH", class: "BE B", grd_point: 27, course: "BCom" },
+    { fname: "Evanshika", lname: "Kapoor", age: 17, gender: "female", city: "Bangalore", state: "KA", class: "SE A", grd_point: 26, course: "BSc" }
+]);
+
+
+// 2. Find all male students in class "TE A" with a grade point of 31 or more
+db.student.find({
+    $and: [
+        { gender: "male" },
+        { class: "TE A" },
+        { grd_point: { $gte: 31 } }
+    ]
+});
+
+// 3. Select documents where the student belongs to "Bangalore" and is 19 years old
+db.student.find({
+    $and: [
+        { city: "Bangalore" },
+        { age: 19 }
+    ]
+});
+
+// 4. Update the course to "MCA" for the student whose first name is "Bhakti"
+db.student.updateOne(
+    { fname: "Bhakti" },
+    { $set: { course: "MCA" } }
+);
+
+// 5. Delete the document where the age is "18" and gender is "male"
+db.student.deleteOne({
+    $and: [
+        { age: 18 },
+        { gender: "male" }
+    ]
+});
+
+// 6. Delete the document where the last name is "Jadhav" and class is "TE B"
+db.student.deleteOne({
+    $and: [
+        { lname: "Jadhav" },
+        { class: "TE B" }
+    ]
+});
+
+db.student.find({
+    $nor: [
+        { gender: "male" },
+        { grd_point: { $lt: 30 } }
+    ]
+});
+
+db.student.save({
+    _id: ObjectId("replace_with_existing_id_if_updating"),  // Use an existing _id if updating
+    fname: "Ravi",
+    lname: "Kulkarni",
+    age: 20,
+    gender: "male",
+    city: "Kolhapur",
+    state: "MH",
+    class: "TE C",
+    grd_point: 34,
+    course: "BSc"
+});
+
+
+// Additional Queries:
+
+// A. Select all students where gender is male or grade point is 31 or more
+db.student.find({
+    $or: [
+        { gender: "male" },
+        { grd_point: { $gte: 31 } }
+    ]
+});
+
+// B. Update the age to 20 for the student whose first name is "Riyansh"
+db.student.updateOne(
+    { fname: "Riyansh" },
+    { $set: { age: 20 } }
+);
+
+// C. Update the city to "Nagpur" and state to "MH" for the student whose last name is "Soniminde"
+db.student.updateMany(
+    { lname: "Soniminde" },
+    { $set: { city: "Nagpur", state: "MH" } }
+);
+
+// D. Delete all students from the state "KA" (who have canceled their admission)
+db.student.deleteMany(
+    { state: "KA" }
+);
+
+db.student.find({
+    $nor: [
+        { gender: "male" },
+        { grd_point: { $lt: 30 } }
+    ]
+});
+
+db.student.deleteOne({
+    $and: [
+        { fname: "Evanshika" },
+        { age: { $lt: 18 } }
+    ]
+});

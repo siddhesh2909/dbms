@@ -1,0 +1,31 @@
+db.city.insertMany([
+  { cityname: "Mumbai", area: 603, population: 204 },
+  { cityname: "Pune", area: 450, population: 35 },
+  { cityname: "Nagpur", area: 217, population: 24 },
+  { cityname: "Nashik", area: 300, population: 14 },
+  { cityname: "Thane", area: 147, population: 18 },
+  { cityname: "Solapur", area: 180, population: 9 },
+  { cityname: "Kolhapur", area: 66, population: 5 },
+  { cityname: "Aurangabad", area: 140, population: 12 }
+])
+db.city.mapReduce(
+  // Map function to categorize the cities based on population
+  function() {
+    if (this.population > 10) {
+      emit("HIGHLY POPULATED", 1);
+    } else {
+      emit("LOW POPULATED", 1);
+    }
+  },
+
+  // Reduce function to sum the number of cities in each category
+  function(key, values) {
+    return Array.sum(values);
+  },
+
+  // Output the results
+  {
+    out: "city_population_summary"
+  }
+)
+db.city_population_summary.find()

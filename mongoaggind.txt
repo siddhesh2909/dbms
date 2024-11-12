@@ -1,0 +1,72 @@
+db.student.insertMany([
+  { Rollno: 1, Name: "Aman", Class: "TE", Div: "A", Subject: "TOC", Marks: 85, Address: { City: "Pune", State: "MH" } },
+  { Rollno: 2, Name: "Bhavna", Class: "TE", Div: "B", Subject: "DBMS", Marks: 72, Address: { City: "Mumbai", State: "MH" } },
+  { Rollno: 3, Name: "Chetan", Class: "TE", Div: "A", Subject: "SPOS", Marks: 90, Address: { City: "Pune", State: "MH" } },
+  { Rollno: 4, Name: "Divya", Class: "TE", Div: "B", Subject: "DBMS", Marks: 60, Address: { City: "Bangalore", State: "KA" } },
+  { Rollno: 5, Name: "Ekta", Class: "TE", Div: "C", Subject: "TOC", Marks: 78, Address: { City: "Pune", State: "MH" } },
+  { Rollno: 6, Name: "Farhan", Class: "TE", Div: "B", Subject: "SPOS", Marks: 65, Address: { City: "Pune", State: "MH" } }
+]);
+
+Find the average marks of students in the subject "TOC".
+db.student.aggregate([
+  { $match: { Subject: "TOC" } },
+  { $group: { _id: null, avgMarks: { $avg: "$Marks" } } }
+]);
+
+Find the number of students in each division.
+db.student.aggregate([
+  { $group: { _id: "$Div", count: { $sum: 1 } } }
+]);
+
+Find the student(s) of division "B" who scored the minimum marks in "DBMS".
+db.student.aggregate([
+  { $match: { Div: "B", Subject: "DBMS" } },
+  { $group: { _id: null, minMarks: { $min: "$Marks" } } }
+]);
+
+Find the total sum of marks in "SPOS" for students staying in Pune.
+db.student.aggregate([
+  { $match: { Subject: "SPOS", "Address.City": "Pune" } },
+  { $group: { _id: null, totalMarks: { $sum: "$Marks" } } }
+]);
+
+Find the division-wise count of students in the "DBMS" subject.
+db.student.aggregate([
+  { $match: { Subject: "DBMS" } },
+  { $group: { _id: "$Div", count: { $sum: 1 } } }
+]);
+
+db.student.createIndex({ Marks: 1 });
+
+db.student.createIndex({ Class: 1, Subject: 1 });
+
+NEXTPROGRAM
+
+Find the maximum marks of students in "DS" by city.
+db.student.aggregate([
+  { $match: { Subject: "DS" } },
+  { $group: { _id: "$Address.City", maxMarks: { $max: "$Marks" } } }
+]);
+
+Calculate the average marks for all students.
+db.student.aggregate([
+  { $group: { _id: null, avgMarks: { $avg: "$Marks" } } }
+]);
+
+Group student names by division.
+db.student.aggregate([
+  { $group: { _id: "$Div", students: { $push: "$Name" } } }
+]);
+
+Create a compound index on Name and Class
+db.student.createIndex({ Name: 1, Class: 1 });
+
+db.student.createIndex({ Name: 1 });
+db.student.dropIndex({ Name: 1 });
+
+db.student.aggregate([
+  { $match: { Subject: "TOC" } },
+  { $group: { _id: "$Div", avgMarks: { $avg: "$Marks" } } },
+  { $sort: { _id: 1 } }
+]);
+

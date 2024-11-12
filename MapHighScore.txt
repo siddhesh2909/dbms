@@ -1,0 +1,117 @@
+db.student.insertMany([
+  {
+    first_name: "Amit",
+    last_name: "Patil",
+    age: 20,
+    gender: "male",
+    class: "TE A",
+    dbms_marks: 75,
+    city: "Pune",
+    course: "BSc IT"
+  },
+  {
+    first_name: "Bhakti",
+    last_name: "Shinde",
+    age: 21,
+    gender: "female",
+    class: "TE B",
+    dbms_marks: 65,
+    city: "Mumbai",
+    course: "BSc CS"
+  },
+  {
+    first_name: "Rohan",
+    last_name: "Desai",
+    age: 19,
+    gender: "male",
+    class: "TE A",
+    dbms_marks: 35,
+    city: "Bangalore",
+    course: "BCA"
+  },
+  {
+    first_name: "Sneha",
+    last_name: "Jadhav",
+    age: 18,
+    gender: "female",
+    class: "TE B",
+    dbms_marks: 42,
+    city: "Delhi",
+    course: "BBA"
+  },
+  {
+    first_name: "Mehul",
+    last_name: "Mongre",
+    age: 19,
+    gender: "male",
+    class: "TE A",
+    dbms_marks: 80,
+    city: "Bangalore",
+    course: "BSc IT"
+  },
+  {
+    first_name: "Sia",
+    last_name: "Jadhav",
+    age: 22,
+    gender: "female",
+    class: "TE B",
+    dbms_marks: 55,
+    city: "Chennai",
+    course: "BSc Physics"
+  }
+])
+db.student.mapReduce(
+  // Map Function
+  function() {
+    if (this.dbms_marks > 70) {
+      emit("Highscores", 1);
+    } else if (this.dbms_marks > 40 && this.dbms_marks <= 70) {
+      emit("Average scores", 1);
+    } else {
+      emit("Failed", 1);
+    }
+  },
+
+  // Reduce Function
+  function(key, values) {
+    return Array.sum(values);
+  },
+
+  // Output
+  {
+    out: "student_scores_summary"
+  }
+)
+db.student_scores_summary.find()
+
+db.student.mapReduce(
+  // Map Function
+  function() {
+    emit(this.city, { count: 1, total_marks: this.dbms_marks });
+  },
+
+  // Reduce Function
+  function(city, values) {
+    let totalMarks = 0;
+    let count = 0;
+    values.forEach(value => {
+      totalMarks += value.total_marks;
+      count += value.count;
+    });
+    return { count: count, total_marks: totalMarks };
+  },
+
+  // Finalize Function (optional)
+  function(city, reducedValue) {
+    return { average_marks: reducedValue.total_marks / reducedValue.count };
+  },
+
+  // Output
+  {
+    out: "average_marks_by_city"
+  }
+);
+
+// Display the results
+db.average_marks_by_city.find();
+

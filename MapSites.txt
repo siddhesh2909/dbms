@@ -1,0 +1,60 @@
+db.sites.insertMany([
+  { url: "www.example.com", dateofaccess: new Date("2024-01-15") },
+  { url: "www.test.com", dateofaccess: new Date("2024-01-20") },
+  { url: "www.example.com", dateofaccess: new Date("2024-02-01") },
+  { url: "www.demo.com", dateofaccess: new Date("2024-01-10") },
+  { url: "www.example.com", dateofaccess: new Date("2024-01-25") },
+  { url: "www.test.com", dateofaccess: new Date("2024-02-05") },
+  { url: "www.example.com", dateofaccess: new Date("2024-01-30") },
+  { url: "www.demo.com", dateofaccess: new Date("2024-02-15") },
+  { url: "www.example.com", dateofaccess: new Date("2024-02-18") }
+])
+db.sites.mapReduce(
+  // Map function
+  function() {
+    const month = this.dateofaccess.getMonth() + 1; // Get the month (1-12)
+    const year = this.dateofaccess.getFullYear();    // Get the year
+    const key = this.url + "_" + year + "_" + month; // Create a key combining url, year, and month
+    emit(key, 1); // Emit the key and a count of 1 for each access
+  },
+
+  // Reduce function to sum the accesses for each key
+  function(key, values) {
+    return Array.sum(values);
+  },
+
+  // Output the result
+  {
+    out: "site_access_summary"
+  }
+)
+db.sites.insertMany([
+  { url: "www.example.com", dateofaccess: new Date("2024-01-15") },
+  { url: "www.test.com", dateofaccess: new Date("2024-01-20") },
+  { url: "www.example.com", dateofaccess: new Date("2024-02-01") },
+  { url: "www.demo.com", dateofaccess: new Date("2024-01-10") },
+  { url: "www.example.com", dateofaccess: new Date("2024-01-25") },
+  { url: "www.test.com", dateofaccess: new Date("2024-02-05") },
+  { url: "www.example.com", dateofaccess: new Date("2024-01-30") },
+  { url: "www.demo.com", dateofaccess: new Date("2024-02-15") },
+  { url: "www.example.com", dateofaccess: new Date("2024-02-18") }
+])
+db.sites.mapReduce(
+  // Map function
+  function() {
+    const month = this.dateofaccess.getMonth() + 1; // Get the month (1-12)
+    const year = this.dateofaccess.getFullYear();    // Get the year
+    const key = this.url + "_" + year + "_" + month; // Create a key combining url, year, and month
+    emit(key, 1); // Emit the key and a count of 1 for each access
+  },
+
+  // Reduce function to sum the accesses for each key
+  function(key, values) {
+    return Array.sum(values);
+  },
+
+  // Output the result
+  {
+    out: "site_access_summary"
+  }
+)
